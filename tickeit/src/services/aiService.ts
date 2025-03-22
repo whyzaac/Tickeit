@@ -173,6 +173,8 @@ Based on the above information, provide a concise standup response for a ${role}
 3. Any potential blockers they should be aware of
 4. Any team dependencies they should know about
 5. In your response, refer to the tasks by their title, not by their IDs.
+6. Make sure your reply has no additional formatting like bold or italics.
+7. Give your answer in point form.
 Keep the response under 200 words and make it actionable.
 `;
 
