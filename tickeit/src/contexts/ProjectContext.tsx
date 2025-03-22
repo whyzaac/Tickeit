@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import {
   ProjectBrief,
   MeetingNote,
@@ -6,29 +6,48 @@ import {
   Role,
   ProjectContext as IProjectContext,
 } from "../models/interfaces";
+import { dataStore } from "../data/data";
 
 const ProjectContext = createContext<IProjectContext | undefined>(undefined);
 
 export const ProjectProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [projectBrief, setProjectBrief] = useState<ProjectBrief | null>(null);
-  const [meetingNotes, setMeetingNotes] = useState<MeetingNote[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  // Use state to trigger re-renders, but get actual data from dataStore
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+  
+  // Force component update
+  const forceUpdate = () => setUpdateTrigger(prev => prev + 1);
+  
+  // Get data from the store
+  const projectBrief = dataStore.getProjectBrief();
+  const meetingNotes = dataStore.getMeetingNotes();
+  const tasks = dataStore.getTasks();
+  const selectedRole = dataStore.getSelectedRole();
+
+  const setProjectBrief = (brief: ProjectBrief) => {
+    dataStore.setProjectBrief(brief);
+    forceUpdate();
+  };
 
   const addMeetingNote = (note: MeetingNote) => {
-    setMeetingNotes([...meetingNotes, note]);
+    dataStore.addMeetingNote(note);
+    forceUpdate();
+  };
+
+  const setTasks = (newTasks: Task[]) => {
+    dataStore.setTasks(newTasks);
+    forceUpdate();
   };
 
   const updateTask = (updatedTask: Task) => {
-    setTasks(
-      tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
-    );
+    dataStore.updateTask(updatedTask);
+    forceUpdate();
   };
 
-  const selectRole = (role: Role) => {
-    setSelectedRole(role);
+  const selectRole = (role: Role | null) => {
+    dataStore.selectRole(role);
+    forceUpdate();
   };
 
   return (

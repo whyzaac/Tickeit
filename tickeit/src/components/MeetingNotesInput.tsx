@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import { useProject } from "../contexts/ProjectContext";
 import { generateTasksFromContext } from "../services/aiService";
+import { dataStore } from "../data/data";
 
 const MeetingNotesInput: React.FC = () => {
-  const { projectBrief, meetingNotes, addMeetingNote, tasks, setTasks } =
-    useProject();
+  const { projectBrief, meetingNotes, addMeetingNote, tasks, setTasks } = useProject();
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 

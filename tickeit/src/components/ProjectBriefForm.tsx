@@ -1,13 +1,15 @@
+// src/components/ProjectBriefForm.tsx
 import React, { useState } from "react";
 import { useProject } from "../contexts/ProjectContext";
 import Select from "react-select";
-import axios from 'axios'; // Import axios for API requests
+import { Role } from "../models/interfaces";
+import { dataStore } from "../data/data";
 
-// Combine availableTechStacks with your current tech stack options
 const availableTechStacks = [
   "React",
   "TypeScript",
   "JavaScript",
+  "Java",
   "Node.js",
   "Express",
   "MongoDB",
@@ -24,7 +26,7 @@ const availableTechStacks = [
   "Kubernetes"
 ];
 
-const roleOptions = [
+const roleOptions: { value: Role; label: Role }[] = [
   { value: "frontend", label: "frontend" },
   { value: "backend", label: "backend" },
 ];
@@ -34,16 +36,18 @@ const techOptions = availableTechStacks.map((tech) => ({
   label: tech
 }));
 
-type Role = "frontend" | "backend";
-
 interface TeamMember {
   id: string;
   name: string;
   role: Role;
 }
 
-const ProjectBriefForm: React.FC = () => {
-  const { setProjectBrief } = useProject();  // This might be used if you're storing the brief in a context
+interface ProjectBriefFormProps {
+  onComplete?: () => void;
+}
+
+const ProjectBriefForm: React.FC<ProjectBriefFormProps> = ({ onComplete }) => {
+  const { setProjectBrief } = useProject();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [techStack, setTechStack] = useState<any[]>([]);
@@ -56,54 +60,37 @@ const ProjectBriefForm: React.FC = () => {
     setTechStack(selectedOptions ? selectedOptions.map((option: any) => option.value) : []);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Convert goals to an array (splitting by newline) and filter empty lines
     const goalsArray = goals.split("\n").filter((goal) => goal.trim() !== "");
+    const projectBrief = {
+      title,
+      description,
+      techStack,
+      teamMembers,
+      goals: goalsArray,
+    };
+
+    // Create a new project and set it as the current project
+    const projectId = dataStore.createProject(projectBrief);
     
-    try {
-      // Send the project data to the backend
-      await axios.post('http://localhost:5001/api/project-brief', {
-        title,
-        description,
-        techStack,
-        teamMembers,
-        goals: goalsArray,
-      });
-
-      // Optionally, clear the form after submission
-      setTitle('');
-      setDescription('');
-      setTechStack([]);
-      setTeamMembers([{ id: "member-1", name: "", role: "frontend" as Role }]);
-      setGoals('');
-
-      // If you're saving to a context (like `useProject`), update it here:
-      setProjectBrief({
-        title,
-        description,
-        techStack,
-        teamMembers,
-        goals: goalsArray,
-      });
-
-      // Optionally, you can add feedback or other actions after the submission is successful
-      alert("Project Brief saved successfully!");
-
-    } catch (error) {
-      console.error("Error submitting project brief:", error);
+    // No need to call setProjectBrief as createProject already sets the current project
+    
+    if (onComplete) {
+      onComplete();
     }
   };
 
   // Update Team Member
   const handleTeamMemberChange = (index: number, field: keyof TeamMember, value: string) => {
     const updatedMembers = [...teamMembers];
+  
     if (field === "role") {
-      updatedMembers[index][field] = value as Role;  // Cast to Role
+      updatedMembers[index][field] = value as Role; // Cast to Role
     } else {
       updatedMembers[index][field] = value;
     }
+  
     setTeamMembers(updatedMembers);
   };
 
@@ -162,24 +149,24 @@ const ProjectBriefForm: React.FC = () => {
         {/* Team Member Inputs */}
         <div className="mb-4">
           <label htmlFor="teamMembers" className="block text-sm font-medium">Add Team Members (Name and Role)</label>
-          <div className="space-y-4">
+          <div className="space-y-20">
             {/* Loop through the team members */}
             {teamMembers.map((member, index) => (
-              <div key={index} className="flex space-y-4 mb-4">
+              <div key={index} className="flex space-y-6 mb-6">
                 {/* Name Input */}
                 <input
                   type="text"
                   placeholder={`Enter Name ${index + 1}`}
                   value={member.name}
                   onChange={(e) => handleTeamMemberChange(index, "name", e.target.value)}
-                  className="p-3 border border-gray-300 rounded-md w-full"
+                  className="p-3 border border-gray-300 space-y-6 rounded-md w-full"
                 />
                 {/* Role Dropdown */}
                 <Select
                   value={{ value: member.role, label: member.role }}
                   onChange={(selectedOption) => handleTeamMemberChange(index, "role", selectedOption?.value || "")}
                   options={roleOptions}
-                  className="w-40"
+                  className="w-40 space-y-6"
                 />
               </div>
             ))}
@@ -196,12 +183,15 @@ const ProjectBriefForm: React.FC = () => {
 
         {/* Project Goals */}
         <div className="form-group">
-          <label htmlFor="goals" className="block text-sm font-medium">Project Goals (one per line)</label>
+          <label htmlFor="goals" className="block text-sm font-medium">Project Goals </label>
           <textarea
             id="goals"
             value={goals}
             onChange={(e) => setGoals(e.target.value)}
-            placeholder="Create a functional MVP\nImplement user authentication\nDeploy to production"
+            placeholder="Create a functional MVP 
+
+Implement user authentication
+Deploy to production"
             required
             className="w-full p-3 mt-1 border border-gray-300 rounded-md"
           />

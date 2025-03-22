@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useProject } from "../contexts/ProjectContext";
 import { getAIStandupResponse } from "../services/aiService";
-import { Role } from "../models/interfaces";
+import { dataStore } from "../data/data";
 
 const AIStandupChat: React.FC = () => {
   const { projectBrief, tasks, meetingNotes, selectedRole } = useProject();

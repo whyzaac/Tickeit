@@ -1,3 +1,4 @@
+// src/models/interfaces.ts
 export type Role = "frontend" | "backend" | "ai" | "pm" | "designer";
 
 export interface TeamMember {
@@ -7,11 +8,11 @@ export interface TeamMember {
 }
 
 export interface Task {
-  assignedUser: string;
   id: string;
   title: string;
   description: string;
   assignedRole: Role;
+  assignedUser: string;
   status: "todo" | "in-progress" | "done";
   priority: "low" | "medium" | "high";
   createdAt: Date;
@@ -24,8 +25,6 @@ export interface ProjectBrief {
   teamMembers: TeamMember[];
   goals: string[];
 }
-
-
 
 export interface MeetingNote {
   id: string;
@@ -42,5 +41,5 @@ export interface ProjectContext {
   addMeetingNote: (note: MeetingNote) => void;
   setTasks: (tasks: Task[]) => void;
   updateTask: (task: Task) => void;
-  selectRole: (role: Role) => void;
+  selectRole: (role: Role | null) => void;
 }
