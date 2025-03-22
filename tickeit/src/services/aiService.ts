@@ -2,7 +2,7 @@ import axios from "axios";
 import { ProjectBrief, MeetingNote, Task, Role } from "../models/interfaces";
 
 // Configuration
-const GEMINI_API_KEY = "AIzaSyCbop97JqeAtmaQzIVzANnoZDrOMhhexQc";
+const GEMINI_API_KEY = import.meta.env.VITE_API_KEY; //Create own .env and insert API KEY
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
