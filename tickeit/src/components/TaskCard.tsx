@@ -2,7 +2,6 @@
 import React from "react";
 import { Task } from "../models/interfaces";
 import { useProject } from "../contexts/ProjectContext";
-import { dataStore } from "../data/data";
 
 interface TaskCardProps {
   task: Task;
