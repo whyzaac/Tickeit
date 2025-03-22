@@ -4,9 +4,8 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const port = 5001;
 
-// Enable CORS to allow frontend to connect to backend
 app.use(cors());
-app.use(express.json()); // Parse JSON body
+app.use(express.json());
 
 // Open or create SQLite database
 const db = new sqlite3.Database('./project_briefs.db', (err) => {
@@ -28,29 +27,6 @@ db.run(`
   );
 `);
 
-// Route to save project brief data
-app.post('/api/project-brief', (req, res) => {
-  const { title, description, techStack, goals } = req.body;
-  
-  const goalsArray = goals.join("\n"); // Convert goals array into a string
-  
-  const sql = `
-    INSERT INTO project_briefs (title, description, techStack, goals)
-    VALUES (?, ?, ?, ?)
-  `;
-  
-  db.run(sql, [title, description, techStack, goalsArray], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    return res.status(200).json({
-      message: "Project brief saved successfully!",
-      data: { title, description, techStack, goals },
-      id: this.lastID
-    });
-  });
-});
-
 // Route to get all project briefs
 app.get('/api/project-brief', (req, res) => {
   const sql = 'SELECT * FROM project_briefs';
@@ -63,6 +39,26 @@ app.get('/api/project-brief', (req, res) => {
       message: "Project briefs fetched successfully!",
       data: rows,
     });
+  });
+});
+
+// Route to delete a project by ID
+app.delete('/api/project-brief/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = 'DELETE FROM project_briefs WHERE id = ?';
+
+  db.run(sql, [id], function (err) {
+    if (err) {
+      console.error(err.message);
+      return res.status(500).json({ error: 'Failed to delete the project' });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    return res.status(200).json({ message: 'Project deleted successfully' });
   });
 });
 
